@@ -2,20 +2,19 @@
 
   Syntax examples:
     
-    Install/update certificate and bindings for "Default Web Site":
-      update-iis-certificate.ps1 ".\pkcs12.pfx" -CertSubject "example.com" -PFXPassword "P@ssw0rd"
+    Install/update certificate in certificate store and webbindings for "Default Web Site" in IIS:
+      update-iis-certificate.ps1 ".\example.com.pfx" -CertSubject "example.com" -PFXPassword "P@ssw0rd"
 
-    Remove certificate and all bindings from "Default Web Site":
+    Remove certificate from certificate store and webbindings for "Default Web Site" from IIS:
       update-iis-certificate.ps1 -CertSubject "example.com" -Remove
                                  
-
     Passing parameters:
       update-iis-certificate.ps1 [[-PFXPath] <String>] -CertSubject <String> [-PFXPassword <String> ]
                                  [-SiteName <String> ][-IP <String> ][-Port <int> ][-HostHeader <String> ]
                                  [-SNI][-Remove][-ExcludeLocalServerCert]
       
     All parameters in square brackets are optional.
-    Most of them are for custimzed Webbindings, see:
+    Most of them are for custimzed webbindings, see:
     https://technet.microsoft.com/de-de/library/hh867854(v=wps.630).aspx
     The ExcludeLocalServerCert is forced to $True if left off. 
     You really never want this set to false, especially
@@ -260,7 +259,7 @@ if ($ImportSucceed -eq $True -OR $Remove) {
             Write-Output $NewSslBinding
           } Else {
             $NewWebBinding = New-WebBinding -Name $SiteName -IP $IP -Port $Port -Protocol "https" -SslFlags $SNI
-            # Create new binding in SSLBindings store
+            Write-Output $NewWebBinding
             $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)"
             Write-Output $NewSslBinding
           }
