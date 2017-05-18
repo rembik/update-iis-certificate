@@ -1,5 +1,5 @@
 # Update IIS certificate
-PowerShell script for automation certificate deployment (credits to (Jeremy)[http://www.jhouseconsulting.com/2015/01/04/script-to-import-and-bind-a-certificate-to-the-default-web-site-1548]). Tested on Windows Server 2012 R2.
+PowerShell script for automation certificate deployment (credits to [Jeremy](http://www.jhouseconsulting.com/2015/01/04/script-to-import-and-bind-a-certificate-to-the-default-web-site-1548)). Tested on Windows Server 2012 R2.
 
 ## Requirements
 * PowerShell Version >= 3
