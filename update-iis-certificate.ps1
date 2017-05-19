@@ -170,6 +170,7 @@ try{
         $oldThumbprint = $oldCert.Thumbprint.ToString()
         Write-Output $oldCert
     } Else {
+        $oldThumbprint = ""
         Write-Output " + Unable to locate current (old) cert in certificate store!"
     }
 }
@@ -177,7 +178,8 @@ catch{
     Write-Output " + Unable to locate current (old) cert in certificate store!"
 }
 
-if (!$Remove){
+$ImportSucceed = $False
+If (!$Remove){
     Write-Output " + import certificate into Store..."
     try{
         $ImportOutput = Import-PfxCertificate –FilePath $PFXPath -CertStoreLocation "cert:\LocalMachine\My" -Exportable -Password $secPFXPassword -ErrorAction Stop -ErrorVariable ImportError
@@ -185,12 +187,11 @@ if (!$Remove){
         write-Output $ImportOutput
     }
     catch{
-        $ImportSucceed = $False
         Write-Output " + Failed to import certificate: $ImportError"
     }
 }
 
-if ($ImportSucceed -eq $True -OR $Remove) {
+If ($ImportSucceed -OR $Remove) {
     Write-Output " + Locating the new cert in the Store..."
     try{
         If ($ExcludeLocalServerCert) {
@@ -220,7 +221,7 @@ if ($ImportSucceed -eq $True -OR $Remove) {
     If ($newCert -OR $Remove) {
         Write-Output " + Removing any existing binding from the site and SSLBindings store..."
         try{
-          if ($HostHeader -ne $False){
+          If ($HostHeader -ne $False){
             # Remove existing binding form site  
             if ($null -ne (Get-WebBinding $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https")) {
                 $RemoveWebBinding = Remove-WebBinding -Name $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https"
