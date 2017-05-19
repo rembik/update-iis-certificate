@@ -44,7 +44,7 @@
 #-------------------------------------------------------------
 param (
   [Parameter(Position = 0)][String]$PFXPath,
-  [String]$CertSubject=$(throw "Parameter CertSubject is required, please provide a value! e.g. -CertDomain 'example.com'"),
+  [String]$CertSubject=$(throw "Parameter CertSubject is required, please provide a value! e.g. -CertSubject 'example.com'"),
   [String]$PFXPassword,
   [String]$SiteName,
   [String]$HostHeader,
@@ -223,7 +223,7 @@ If ($ImportSucceed -OR $Remove) {
         try{
           If ($HostHeader -ne $False){
             # Remove existing binding form site  
-            if ($null -ne (Get-WebBinding $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https")) {
+            If ($null -ne (Get-WebBinding $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https")) {
                 $RemoveWebBinding = Remove-WebBinding -Name $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https"
                 Write-Output $RemoveWebBinding
             }
