@@ -14,7 +14,7 @@
                                  [-SNI][-Remove][-ExcludeLocalServerCert]
       
     All parameters in square brackets are optional.
-    Most of them are for custimzed webbindings, see:
+    Most of them are for customized webbindings, see:
     https://technet.microsoft.com/de-de/library/hh867854(v=wps.630).aspx
     The ExcludeLocalServerCert is forced to $True if left off. 
     You really never want this set to false, especially
