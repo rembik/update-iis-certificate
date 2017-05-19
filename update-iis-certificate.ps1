@@ -175,7 +175,6 @@ If ($oldCert) {
     Write-Output " + Unable to locate current(old) certificate in store!"
 }
 
-
 $ImportSucceed = $False
 If (!$Remove){
     Write-Output " + Importing certificate into store..."
@@ -204,7 +203,7 @@ If ($ImportSucceed -OR $Remove) {
     }
     catch{
         Write-Output " + Unable to locate new certificate in store!"
-        }
+    }
 
     If ($newCert -OR $Remove) {
         Write-Output " + Removing any existing binding from the site and SSLBindings store..."
@@ -221,7 +220,7 @@ If ($ImportSucceed -OR $Remove) {
                 Write-Output $RemoveSSLBinding
             }
           } Else { 
-            if ($null -ne (Get-WebBinding $SiteName -IPAddress $IP -Port $Port -Protocol "https")) {
+            If ($null -ne (Get-WebBinding $SiteName -IPAddress $IP -Port $Port -Protocol "https")) {
                 $RemoveWebBinding = Remove-WebBinding -Name $SiteName -IPAddress $IP -Port $Port -Protocol "https"
                 Write-Output $RemoveWebBinding
             }
