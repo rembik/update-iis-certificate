@@ -9,8 +9,8 @@ PowerShell script for automation certificate deployment (credits to [Jeremy](htt
 ## Usage
 ```
 PS C:\> .\update-iis-certificate.ps1 [[-PFXPath] <String>] -CertSubject <String> [-PFXPassword <String> ]
-                                   [-SiteName <String> ][-IP <String> ][-Port <int> ][-HostHeader <String> ]
-                                   [-SNI][-Remove][-ExcludeLocalServerCert]
+                                     [-SiteName <String> ][-IP <String> ][-Port <int> ][-HostHeader <String> ]
+                                     [-SNI][-Remove][-ExcludeLocalServerCert]
 ```
 All parameters in square brackets are optional. Most of them are for customized webbindings, see [Microsoft - Technet Docs](https://technet.microsoft.com/de-de/library/hh867854(v=wps.630).aspx). 
 The ExcludeLocalServerCert is forced to $True if left off. You really never want this set to false, especially if using a wildcard certificate. It's there mainly for flexibility.
