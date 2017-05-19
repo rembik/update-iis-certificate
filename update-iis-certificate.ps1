@@ -42,6 +42,7 @@
 #>
 
 #-------------------------------------------------------------
+
 param (
   [Parameter(Position = 0)][String]$PFXPath,
   [String]$CertSubject=$(throw "Parameter CertSubject is required, please provide a value! e.g. -CertSubject 'example.com'"),
@@ -149,7 +150,7 @@ Write-Output "Logging to $($logFile):"
 
 #-------------------------------------------------------------
 
-Write-Output " +++ Start Certificate Installation/Update +++ "
+Write-Output " +++ Start Certificate Update +++ "
 
 Write-Output " + Loading the Web Administration Module..."
 try{
@@ -159,31 +160,29 @@ catch{
     Write-Output " + Failed to load the Web Administration Module!"
 }
 
-Write-Output " + Locating the current (old) cert in the Store..."
-try{
-    If ($ExcludeLocalServerCert) {
-        $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.subject -notmatch "CN=$env:COMPUTERNAME"}
-    } Else {
-        $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*"}
-    }
-    If ($oldCert) {
-        $oldThumbprint = $oldCert.Thumbprint.ToString()
-        Write-Output $oldCert
-    } Else {
-        $oldThumbprint = ""
-        Write-Output " + Unable to locate current (old) cert in certificate store!"
-    }
+Write-Output " + Locating the current(old) certificate in store..."
+If ($ExcludeLocalServerCert) {
+    $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.subject -notmatch "CN=$env:COMPUTERNAME"}
+} Else {
+    $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*"}
 }
-catch{
-    Write-Output " + Unable to locate current (old) cert in certificate store!"
+If ($oldCert) {
+    $oldThumbprint = $oldCert.Thumbprint.ToString()
+    Write-Output " + Current(old) certificate:"
+    Write-Output $oldCert
+} Else {
+    $oldThumbprint = ""
+    Write-Output " + Unable to locate current(old) certificate in store!"
 }
+
 
 $ImportSucceed = $False
 If (!$Remove){
-    Write-Output " + import certificate into Store..."
+    Write-Output " + Importing certificate into store..."
     try{
         $ImportOutput = Import-PfxCertificate –FilePath $PFXPath -CertStoreLocation "cert:\LocalMachine\My" -Exportable -Password $secPFXPassword -ErrorAction Stop -ErrorVariable ImportError
         $ImportSucceed = $True
+        Write-Output " + Imported certificate:"
         write-Output $ImportOutput
     }
     catch{
@@ -192,7 +191,7 @@ If (!$Remove){
 }
 
 If ($ImportSucceed -OR $Remove) {
-    Write-Output " + Locating the new cert in the Store..."
+    Write-Output " + Locating the new certificate in store..."
     try{
         If ($ExcludeLocalServerCert) {
             $newCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.thumbprint -ne $oldThumbprint -AND $_.subject -notmatch "CN=$env:COMPUTERNAME"}
@@ -200,31 +199,20 @@ If ($ImportSucceed -OR $Remove) {
             $newCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.thumbprint -ne $oldThumbprint}
         }
         $newThumbprint = $newCert.Thumbprint.ToString()
+        Write-Output " + New certificate:"
         Write-Output $newCert
     }
     catch{
-        Write-Output " + Unable to locate new cert in certificate store!"
+        Write-Output " + Unable to locate new certificate in store!"
         }
-
-    If ($oldCert -And ($newCert -OR $Remove)) {
-        Write-Output " + Deleting old certificate from Store..."
-        try{
-            If (Test-Path "cert:\LocalMachine\My\$oldThumbprint") {
-              Remove-Item -Path cert:\LocalMachine\My\$oldThumbprint -DeleteKey
-            }
-        }
-        catch{
-            Write-Output " + Unable to delete old certificate from store!"
-        }
-    }
 
     If ($newCert -OR $Remove) {
         Write-Output " + Removing any existing binding from the site and SSLBindings store..."
         try{
           If ($HostHeader -ne $False){
             # Remove existing binding form site  
-            If ($null -ne (Get-WebBinding $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https")) {
-                $RemoveWebBinding = Remove-WebBinding -Name $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https"
+            If ($null -ne (Get-WebBinding $SiteName -HostHeader $HostHeader -IPAddress $IP -Port $Port -Protocol "https")) {
+                $RemoveWebBinding = Remove-WebBinding -Name $SiteName -HostHeader $HostHeader -IPAddress $IP -Port $Port -Protocol "https"
                 Write-Output $RemoveWebBinding
             }
             # Remove existing binding in SSLBindings store
@@ -233,8 +221,8 @@ If ($ImportSucceed -OR $Remove) {
                 Write-Output $RemoveSSLBinding
             }
           } Else { 
-            if ($null -ne (Get-WebBinding $SiteName -IP $IP -Port $Port -Protocol "https")) {
-                $RemoveWebBinding = Remove-WebBinding -Name $SiteName -IP $IP -Port $Port -Protocol "https"
+            if ($null -ne (Get-WebBinding $SiteName -IPAddress $IP -Port $Port -Protocol "https")) {
+                $RemoveWebBinding = Remove-WebBinding -Name $SiteName -IPAddress $IP -Port $Port -Protocol "https"
                 Write-Output $RemoveWebBinding
             }
             If (Test-Path "IIS:\SslBindings\$IP!$Port") {
@@ -253,13 +241,13 @@ If ($ImportSucceed -OR $Remove) {
         try{
           If ($HostHeader -ne $False){
             # Create new binding for site
-            $NewWebBinding = New-WebBinding -Name $SiteName -HostHeader $HostHeader -IP $IP -Port $Port -Protocol "https" -SslFlags $SNI
+            $NewWebBinding = New-WebBinding -Name $SiteName -HostHeader $HostHeader -IPAddress $IP -Port $Port -Protocol "https" -SslFlags $SNI
             Write-Output $NewWebBinding
             # Create new binding in SSLBindings store
             $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)!$($HostHeader)"
             Write-Output $NewSslBinding
           } Else {
-            $NewWebBinding = New-WebBinding -Name $SiteName -IP $IP -Port $Port -Protocol "https" -SslFlags $SNI
+            $NewWebBinding = New-WebBinding -Name $SiteName -IPAddress $IP -Port $Port -Protocol "https" -SslFlags $SNI
             Write-Output $NewWebBinding
             $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)"
             Write-Output $NewSslBinding
@@ -269,9 +257,21 @@ If ($ImportSucceed -OR $Remove) {
             Write-Output " + Unable to bind new cert!"
         }
     }
+
+    If ($oldCert -And ($newCert -OR $Remove)) {
+        Write-Output " + Deleting old certificate from Store..."
+        try{
+            If (Test-Path "cert:\LocalMachine\My\$oldThumbprint") {
+              Remove-Item -Path cert:\LocalMachine\My\$oldThumbprint -DeleteKey
+            }
+        }
+        catch{
+            Write-Output " + Unable to delete old certificate from store!"
+        }
+    }
 }
 
-Write-Output " +++ Completed Certificate Installation/Update +++ "
+Write-Output " +++ Completed Certificate Update +++ "
  
 # Stop logging 
 Stop-Transcript

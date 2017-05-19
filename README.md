@@ -1,9 +1,9 @@
-# Update IIS certificate
+# Update MS IIS certificate
 PowerShell script for automation certificate deployment (credits to [Jeremy](http://www.jhouseconsulting.com/2015/01/04/script-to-import-and-bind-a-certificate-to-the-default-web-site-1548)). Tested on Windows Server 2012 R2.
 
 ## Requirements
-* PowerShell Version >= 3
-* IIS Version >= 8.5 with Webadministration module
+* PowerShell Version >= 2
+* IIS >= 8.5 with Web Administration module
 * Certificate file [.pfx], private key included
 
 ## Usage
@@ -18,11 +18,11 @@ The ExcludeLocalServerCert is forced to $True if left off. You really never want
 If the password contains a $ sign, you must escape it with the ` ` character.
 
 ### Examples
-Install/update certificate in certificate store and webbindings for "Default Web Site" in IIS:
+Install/update certificate in store and webbindings for "Default Web Site" in IIS:
 ```
 PS C:\> .\update-iis-certificate.ps1 ".\example.com.pfx" -CertSubject "example.com" -PFXPassword "P@ssw0rd"
 ```      
-Remove certificate from certificate store and webbindings for "Default Web Site" from IIS:
+Remove certificate from store and webbindings for "Default Web Site" from IIS:
 ```
 PS C:\> .\update-iis-certificate.ps1 -CertSubject "example.com" -Remove
 ```
