@@ -162,7 +162,7 @@ catch{
 
 Write-Output " + Locating the current(old) certificate in store..."
 If ($ExcludeLocalServerCert) {
-    $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.subject -notmatch "CN=$env:COMPUTERNAME"}
+    $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.subject -notlike "CN=$env:COMPUTERNAME"}
 } Else {
     $oldCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*"}
 }
@@ -193,7 +193,7 @@ If ($ImportSucceed -OR $Remove) {
     Write-Output " + Locating the new certificate in store..."
     try{
         If ($ExcludeLocalServerCert) {
-            $newCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.thumbprint -ne $oldThumbprint -AND $_.subject -notmatch "CN=$env:COMPUTERNAME"}
+            $newCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.thumbprint -ne $oldThumbprint -AND $_.subject -notlike "CN=$env:COMPUTERNAME"}
         } Else {
             $newCert = Get-ChildItem cert:\LocalMachine\My | Where-Object {$_.subject -like "CN=$CertSubject*" -AND $_.thumbprint -ne $oldThumbprint}
         }
