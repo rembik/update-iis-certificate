@@ -243,12 +243,12 @@ If ($ImportSucceed -OR $Remove) {
             $NewWebBinding = New-WebBinding -Name $SiteName -HostHeader $HostHeader -IPAddress $IP -Port $Port -Protocol "https" -SslFlags $SNI
             Write-Output $NewWebBinding
             # Create new binding in SSLBindings store
-            $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)!$($HostHeader)"
+            $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)!$($HostHeader)" -SslFlags $SNI
             Write-Output $NewSslBinding
           } Else {
             $NewWebBinding = New-WebBinding -Name $SiteName -IPAddress $IP -Port $Port -Protocol "https" -SslFlags $SNI
             Write-Output $NewWebBinding
-            $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)"
+            $NewSslBinding = Get-Item -Path "Cert:\LocalMachine\My\$($newThumbprint)" | New-Item -Path "IIS:\SslBindings\$($IP)!$($Port)" -SslFlags $SNI
             Write-Output $NewSslBinding
           }
         }
