@@ -215,8 +215,11 @@ If ($ImportSucceed -OR $Remove) {
                 Write-Output $RemoveWebBinding
             }
             # Remove existing binding in SSLBindings store
-            If (Test-Path "IIS:\SslBindings\$IP!$Port!$HostHeader") {
+            If (Test-Path "IIS:\SslBindings\$IP!$Port!$HostHeader" -AND $SNI -eq 1) {
                 $RemoveSSLBinding = Remove-Item -path "IIS:\SslBindings\$IP!$Port!$HostHeader"
+                Write-Output $RemoveSSLBinding
+            } ElseIf (Test-Path "IIS:\SslBindings\$IP!$Port") {
+                $RemoveSSLBinding = Remove-Item -path "IIS:\SslBindings\$IP!$Port"
                 Write-Output $RemoveSSLBinding
             }
           } Else { 
